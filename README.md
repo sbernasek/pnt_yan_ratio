@@ -9,13 +9,15 @@ This repository contains a series of Jupyter Notebooks that facilitate complete 
 System Requirements
 =========
 
-    1. The [Jupyter Notebook](http://jupyter.org/install) interactive coding platform.
+The notebooks have several external dependencies:
 
-    2. [FlyEye](https://github.com/sebastianbernasek/flyeye), our python package for analyzing FlyEye Silhouette data.
+   1. The [Jupyter Notebook](http://jupyter.org/install) interactive coding platform.
 
-    3. [Binding](https://github.com/sebastianbernasek/binding), our python package for modeling protein-DNA binding interactions (macOS recommended).
+   2. [FlyEye](https://github.com/sebastianbernasek/flyeye), our python package for analyzing FlyEye Silhouette data.
 
-    4. [Clones](https://github.com/sebastianbernasek/clones), our python package for automated segmentation, annotation, and analysis of genetic clones in the developing *Drosophila* eye.
+   3. [Binding](https://github.com/sebastianbernasek/binding), our python package for modeling protein-DNA binding interactions (macOS recommended).
+
+   4. [Clones](https://github.com/sebastianbernasek/clones), our python package for automated segmentation, annotation, and analysis of genetic clones in the developing *Drosophila* eye.
 
 
 
@@ -74,7 +76,7 @@ Note that we applied some minor formatting adjustments using Adobe Illustrator. 
 
 
 
-Further Examples
+Additional Questions
 -------------
 
-For detailed usage examples, please refer to the [code](https://github.com/sebastianbernasek/pnt_yan_ratio) used to generate the figures in our manuscript.
+Please direct any questions related to the analysis covered by these notebooks to the [Amaral lab](https://amaral.northwestern.edu/).
