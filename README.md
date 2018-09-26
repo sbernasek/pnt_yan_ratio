@@ -16,8 +16,8 @@ Dependencies
 
  - [Seaborn](https://seaborn.pydata.org/)
  - [Jupyter Notebook](http://jupyter.org/install)
- - [FlyEye Analysis](https://github.com/sebastianbernasek/flyeye): our package for analyzing FlyEye Silhouette data
- - [FlyEye Clones](https://github.com/sebastianbernasek/clones): our package for analyzing eye clones
+ - [FlyEye Analysis](https://sebastianbernasek.github.io/flyeye/index.html): our package for analyzing FlyEye Silhouette data
+ - [FlyEye Clones](https://sebastianbernasek.github.io/clones/index.html): our package for analyzing eye clones
  - [Binding](https://github.com/sebastianbernasek/binding): our package for modeling protein-DNA binding interactions
 
 
