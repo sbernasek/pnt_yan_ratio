@@ -9,15 +9,20 @@ This repository contains a series of Jupyter Notebooks that facilitate complete 
 System Requirements
 =========
 
-The notebooks have several external dependencies:
+ - Python 3.6+
 
-   1. The [Jupyter Notebook](http://jupyter.org/install) interactive coding platform.
+Dependencies
+------------
 
-   2. [FlyEye](https://github.com/sebastianbernasek/flyeye), our package for analyzing FlyEye Silhouette data.
+ - [Seaborn](https://seaborn.pydata.org/)
+ - [Jupyter Notebook](http://jupyter.org/install)
 
-   3. [Binding](https://github.com/sebastianbernasek/binding), our package for modeling protein-DNA binding interactions (macOS recommended).
+Our Software
+------------
 
-   4. [Clones](https://github.com/sebastianbernasek/clones), our python package for automated segmentation, annotation, and analysis of genetic clones in the *Drosophila* eye.
+ - [FlyEye Analysis](https://github.com/sebastianbernasek/flyeye): for analyzing FlyEye Silhouette data
+ - [FlyEye Clones](https://github.com/sebastianbernasek/clones): for analyzing clonal subpopulations in the eye
+ - [Binding](https://github.com/sebastianbernasek/binding): for modeling protein-DNA binding interactions
 
 
 
