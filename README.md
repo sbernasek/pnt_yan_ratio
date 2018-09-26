@@ -10,15 +10,11 @@ System Requirements
 =========
 
  - Python 3.6+
-
-Dependencies
-------------
-
  - [Seaborn](https://seaborn.pydata.org/)
  - [Jupyter Notebook](http://jupyter.org/install)
 
 Our Software
-------------
+^^^^^^^^^^^^
 
  - [FlyEye Analysis](https://github.com/sebastianbernasek/flyeye): for analyzing FlyEye Silhouette data
  - [FlyEye Clones](https://github.com/sebastianbernasek/clones): for analyzing clonal subpopulations in the eye
