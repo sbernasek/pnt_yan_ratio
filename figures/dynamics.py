@@ -63,7 +63,7 @@ class Expression(Base):
         Progenitor expression dynamics are shown by default. Additional cell types may be added via the cell_types argument.
 
         Args:
-        channel (str) - expression channel
+        channel (str) - fluorescence channel
         cell_types (list) - included cell types to be added
         scatter (bool) - if True, add markers for each measurement
         interval - if True, add confidence interval for moving average
@@ -148,13 +148,13 @@ class Expression(Base):
         self.fig = fig
 
         # plot pnt dynamics
-        self.plot(ax0, 'green', **kw)
+        self.plot(ax0, 'ch1_normalized', **kw)
 
         # plot yan dynamics
-        self.plot(ax1, 'blue', **kw)
+        self.plot(ax1, 'ch2_normalized', **kw)
 
         # plot ratio dynamics
-        self.plot(ax2, 'ratio', **kw)
+        self.plot(ax2, 'logratio', **kw)
 
         # format axis labels
         ax0.set_xlabel('')
@@ -190,7 +190,7 @@ class Expression(Base):
 
         Args:
         ax (plt.Axis instance) - if None, create axes
-        channel (str) - expression channel
+        channel (str) - fluorescence channel
         cell_types (list) - reference cell types to be added
         scatter (bool) - if True, add markers for each measurement
         interval - if True, add confidence interval for moving average
@@ -274,7 +274,7 @@ class Expression(Base):
 
             # shade early R cell region
             if shading is not None:
-                if channel == 'ratio':
+                if channel == 'logratio':
                     self.shade_window(ax, types, color=shading, ymin=-2.75, ymax=2.75, alpha=0.25)
                 else:
                     self.shade_window(ax, types, color=shading, alpha=0.25)
@@ -297,11 +297,11 @@ class Expression(Base):
         """
 
         # select reference cells
-        df = self.experiment.select_by_concurrency(reference, 10, 0, 1)
-        df = df[df.label.isin(reference)]
+        data = self.experiment.select_by_concurrency(reference, 10, 0, 1)
+        data = data[data.label.isin(reference)]
 
         # shade time window
-        tmin, tmax = df.t.min(), df.t.max()
+        tmin, tmax = data.t.min(), data.t.max()
         ax.fill_between([tmin, tmax],
                         [ymin, ymin],
                         [ymax, ymax],
@@ -389,7 +389,7 @@ class DualExpression(Expression):
         self.fig = None
 
     def render(self,
-                channel='green',
+                channel,
                 cell_types=['pre'],
                 figsize=(2, 1),
                 ax_kw={},
@@ -398,7 +398,7 @@ class DualExpression(Expression):
         Render expression timeseries comparison figure.
 
         Args:
-        channel (str) - expression channel
+        channel (str) - fluorescence channel
         cell_types (list) - cell types to be included
         figsize (tuple) - figure size
         ax_kw (dict) - keywoard arguments for format_axis
@@ -432,7 +432,7 @@ class DualExpression(Expression):
         Args:
         ax (plt.Axis instance) - if None, create axes
         exp (str) - experiment key
-        channel (str) - expression channel
+        channel (str) - fluorescence channel
         cell_types (list) - cell types to be included
         scatter (bool) - if True, add markers for each measurement
         interval - if True, add confidence interval for moving average

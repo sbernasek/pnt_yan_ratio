@@ -22,7 +22,7 @@ class HorizontalBoxplot(Base):
     orientation (str) - indicates whether figure is horizontal/vertical
 
     Inherited attributes:
-    df (pd.DataFrame) - data
+    data (pd.DataFrame) - data
     fig (matplotlib.figure.Figure)
     """
 
@@ -46,11 +46,11 @@ class HorizontalBoxplot(Base):
         yan_channel = cls.get_yan_channel(experiment)
 
         # get early neuron data and delineate metrics
-        df = experiment.get_early_neuron_df(**kwargs)
-        data = cls._delineate_metrics(df, yan_channel=yan_channel)
+        data = experiment.get_early_neuron_data(**kwargs)
+        data = cls._delineate_metrics(data, yan_channel=yan_channel)
 
         # instantiate figure object
-        figure_obj = cls(df=data)
+        figure_obj = cls(data=data)
 
         return figure_obj
 
@@ -77,7 +77,7 @@ class HorizontalBoxplot(Base):
         r_cell_types = ['/'.join(types).upper() for types in cell_types]
 
         # get data
-        data = self.df[self.df['ReferenceType'].isin(r_cell_types)]
+        data = self.data[self.data['ReferenceType'].isin(r_cell_types)]
 
         # create facetgrid and plot data
         fig = self.plot(data, height=height, aspect=aspect, width=width, lw=lw)
@@ -126,23 +126,23 @@ class HorizontalBoxplot(Base):
         return fig
 
     @staticmethod
-    def _delineate_metrics(df0, yan_channel='blue'):
+    def _delineate_metrics(data0, yan_channel='ch2_normalized'):
         """ Delineate early neuron data with Metric/Score attributes. """
 
-        df0['Metric'] = 'Pnt'
-        df0['Score'] = df0.green
+        data0['Metric'] = 'Pnt'
+        data0['Score'] = data0.ch1_normalized
 
-        df1 = deepcopy(df0)
-        df1['Metric'] = 'Yan'
-        df1['Score'] = df1[yan_channel]
+        data1 = deepcopy(data0)
+        data1['Metric'] = 'Yan'
+        data1['Score'] = data1[yan_channel]
 
-        df2 = deepcopy(df0)
-        df2['Metric'] = 'Ratio'
-        df2['Score'] = df2.ratio
+        data2 = deepcopy(data0)
+        data2['Metric'] = 'Ratio'
+        data2['Score'] = data2.logratio
 
-        delineated_df = pd.concat((df0, df1, df2))
+        delineated_data = pd.concat((data0, data1, data2))
 
-        return delineated_df
+        return delineated_data
 
     @staticmethod
     def set_patch_colors(fig, cell_types, lw=1):
@@ -252,10 +252,10 @@ class HorizontalBoxplot(Base):
         pvalues (dict) - nested {metric: {cell_type: {test: pvalue}}} pairs where metric is the quantity being compared, cell type indicates the concurrent population of early R cells, test denotes the type of statistical test, and pvalue is the resultant pvalue.
         """
 
-        channel_names = dict(green='PntGFP', blue='Yan', ratio='P:Y ratio')
+        channel_names = dict(ch1_normalized='PntGFP', ch2_normalized='Yan', logratio='P:Y ratio')
 
         # determine unique populations
-        cell_types = self.df['ReferenceType'].unique()
+        cell_types = self.data['ReferenceType'].unique()
 
         # get test
         if test == 'ks_2samp':
@@ -267,14 +267,14 @@ class HorizontalBoxplot(Base):
 
         # iterate across channels to be compared
         stats = {}
-        for channel in ('green', 'blue', 'ratio'):
+        for channel in ('ch1_normalized', 'ch2_normalized', 'logratio'):
             stats[channel_names[channel]] = {}
 
             # iterate across neuron types
             for types in cell_types:
 
                 # get early neurons and concurrent progenitors
-                current = self.df[self.df['ReferenceType']==types]
+                current = self.data[self.data['ReferenceType']==types]
                 multipotent = current[current.Population=='Multipotent'][channel].values
                 differentiated = current[current.Population=='Differentiated'][channel].values
 
@@ -283,9 +283,9 @@ class HorizontalBoxplot(Base):
                 stats[channel_names[channel]][types] = np.log10(pval)
 
         # compile and sort dataframe
-        df = pd.DataFrame.from_dict(stats)
+        data = pd.DataFrame.from_dict(stats)
         columns = ['PntGFP', 'Yan', 'P:Y ratio']
-        return df.loc[cell_types][columns].round(rounding)
+        return data.loc[cell_types][columns].round(rounding)
 
 
 class VerticalBoxplot(HorizontalBoxplot):
@@ -293,7 +293,7 @@ class VerticalBoxplot(HorizontalBoxplot):
     Object for constructing horizontal boxplot comparisons.
 
     Inherited attributes:
-    df (pd.DataFrame) - data
+    data (pd.DataFrame) - data
     fig (matplotlib.figure.Figure)
     orientation (str) - indicates whether figure is horizontal/vertical
     """
@@ -379,7 +379,7 @@ class ViolinPlot(VerticalBoxplot):
     Creates facetgrid and plot data using seaborn.boxplot method. Data must contain Metric, Score, ReferenceType, and Population keys as these are used to categorically partition data within the figure.
 
     Inherited attributes:
-    df (pd.DataFrame) - data
+    data (pd.DataFrame) - data
     fig (matplotlib.figure.Figure)
     orientation (str) - indicates whether figure is horizontal/vertical
     """
@@ -420,20 +420,20 @@ class DosingComparison(VerticalBoxplot):
     pvalues (dict) - comparison statistics
 
     Inherited attributes:
-    df (pd.DataFrame) - data
+    data (pd.DataFrame) - data
     fig (matplotlib.figure.Figure)
     orientation (str) - indicates whether figure is horizontal/vertical
     """
 
-    def __init__(self, df, orientation='v'):
+    def __init__(self, data, orientation='v'):
         """
         Instantiate gene dosage comparison figure.
 
         Args:
-        df (pd.DataFrame) - data for figure
+        data (pd.DataFrame) - data for figure
         orientation (str) - indicates whether figure is horizontal/vertical
         """
-        super().__init__(df)
+        super().__init__(data)
         self.orientation = orientation
 
     @classmethod
@@ -456,22 +456,22 @@ class DosingComparison(VerticalBoxplot):
         pnt1x_aligned, pnt2x_aligned = alignment.get_aligned_experiments()
 
         # get early neuron data
-        df_1x = pnt1x_aligned.get_early_neuron_df(**kwargs)
-        df_2x = pnt2x_aligned.get_early_neuron_df(**kwargs)
+        data_1x = pnt1x_aligned.get_early_neuron_data(**kwargs)
+        data_2x = pnt2x_aligned.get_early_neuron_data(**kwargs)
 
         # assign gene dosage labels
-        df_1x['Dosing'] = '1X PntGFP'
-        df_2x['Dosing'] = '2X PntGFP'
-        dosing_data = pd.concat((df_1x, df_2x))
+        data_1x['Dosing'] = '1X PntGFP'
+        data_2x['Dosing'] = '2X PntGFP'
+        dosing_data = pd.concat((data_1x, data_2x))
 
         # only use progenitors
         data = dosing_data[dosing_data.Population=='Multipotent']
 
         # instantiate DosingComparisonFigure object
-        return cls(df=data, orientation=orientation)
+        return cls(data=data, orientation=orientation)
 
     def render(self,
-               channel='ratio',
+               channel='logratio',
                figsize=(2, 1.5),
                width=.75,
                lw=0.75,
@@ -491,7 +491,7 @@ class DosingComparison(VerticalBoxplot):
         if cell_types is None:
             cell_types = [['r8'],['r2','r5'],['r3', 'r4'],['r1','r6'],['r7']]
         r_cell_types = ['/'.join(types).upper() for types in cell_types]
-        data = self.df[self.df['ReferenceType'].isin(r_cell_types)]
+        data = self.data[self.data['ReferenceType'].isin(r_cell_types)]
 
         # create figure
         self.fig = self.create_figure(figsize=figsize)
@@ -505,7 +505,7 @@ class DosingComparison(VerticalBoxplot):
         self.format_ticklabels(self.fig, cell_types, self.orientation)
 
     def plot(self, data,
-             channel='ratio',
+             channel='logratio',
              width=0.75,
              lw=1):
         """
@@ -550,7 +550,7 @@ class DosingComparison(VerticalBoxplot):
         self.fig.axes[0].legend_.remove()
 
     @staticmethod
-    def _format_ax(ax, channel='green', orientation='v'):
+    def _format_ax(ax, channel='ch1_normalized', orientation='v'):
         """
         Format figure axes.
 
@@ -563,11 +563,11 @@ class DosingComparison(VerticalBoxplot):
         # format axis
 
         # get axis limits
-        if channel == 'green':
+        if channel == 'ch1_normalized':
             lim = (0, 6)
             ticks = np.arange(7)
             label = 'Pnt (a.u.)'
-        elif channel == 'red':
+        elif channel == 'ch2_normalized':
             lim = (0, 6)
             ticks = np.arange(7)
             label = 'Yan (a.u.)'
@@ -637,7 +637,7 @@ class DosingComparison(VerticalBoxplot):
             artist.set_linewidth(lw)
 
     def get_statistics(self,
-                       channel='ratio',
+                       channel='logratio',
                        test='ks_2samp',
                        rounding=2):
         """
@@ -649,7 +649,7 @@ class DosingComparison(VerticalBoxplot):
         rounding (int) - rounding applied to log10(pvalues)
 
         Returns:
-        df (pd.DataFrame) - dataframe summarizing comparison statistics
+        data (pd.DataFrame) - dataframe summarizing comparison statistics
         """
 
         # get test
@@ -661,11 +661,11 @@ class DosingComparison(VerticalBoxplot):
             test = lambda x, y: ttest_ind(x, y, equal_var=True)
 
         # determine unique reference populations
-        cell_types = self.df['ReferenceType'].unique()
+        cell_types = self.data['ReferenceType'].unique()
 
         # split data by PntGFP dosage
-        pnt1x_df = self.df[self.df.Dosing=='1X PntGFP']
-        pnt2x_df = self.df[self.df.Dosing=='2X PntGFP']
+        pnt1x_data = self.data[self.data.Dosing=='1X PntGFP']
+        pnt2x_data = self.data[self.data.Dosing=='2X PntGFP']
 
         # iterate across metrics and cell types to be compared
         stats = {}
@@ -674,8 +674,8 @@ class DosingComparison(VerticalBoxplot):
         for types in cell_types:
 
             # select concurrent progenitors
-            p1 = pnt1x_df[pnt1x_df['ReferenceType']==types]
-            p2 = pnt2x_df[pnt2x_df['ReferenceType']==types]
+            p1 = pnt1x_data[pnt1x_data['ReferenceType']==types]
+            p2 = pnt2x_data[pnt2x_data['ReferenceType']==types]
 
             # get scores
             p1scores = p1[channel].values
@@ -698,22 +698,22 @@ class PerturbationComparison(Base):
     reference (pd.DataFrame) - data for reference cells
 
     Inherited attributes:
-    df (pd.DataFrame) - data
+    data (pd.DataFrame) - data
     fig (matplotlib.figure.Figure)
     """
 
-    def __init__(self, df, reference, **kwargs):
+    def __init__(self, data, reference, **kwargs):
         """
         Instantiate perturbation comparison figure.
 
         Args:
-        df (pd.DataFrame) - data containing Control/Perturbation labels
+        data (pd.DataFrame) - data containing Control/Perturbation labels
         reference (list) - reference cell types
         kwargs: keyword arguments for concurrent cell selection
         """
 
         # define measurement data
-        cells = self.select_concurrent(df, reference, **kwargs)
+        cells = self.select_concurrent(data, reference, **kwargs)
         self.reference_types = reference
         self.pre = cells[cells.label=='pre']
         self.reference = cells[cells.label.isin(reference)]
@@ -737,27 +737,27 @@ class PerturbationComparison(Base):
         """
 
         # compile control data
-        control = pd.concat([d.df for d in control.discs.values()])
+        control = pd.concat([d.data for d in control.discs.values()])
         control['experiment'] = 'Control'
 
         # compile perturbation data
-        perturbation = pd.concat([d.df for d in perturbation.discs.values()])
+        perturbation = pd.concat([d.data for d in perturbation.discs.values()])
         perturbation['experiment'] = 'Perturbation'
 
         # concatenate data
-        df = pd.concat((control, perturbation))
+        data = pd.concat((control, perturbation))
 
-        return cls(df, reference, **kwargs)
+        return cls(data, reference, **kwargs)
 
     @staticmethod
-    def select_concurrent(df, reference,
+    def select_concurrent(data, reference,
                           offset=1,
                           n=25):
         """
         Select all cells concurrent with early cells of a reference cell type.
 
         Args:
-        df (pd.DataFrame) - cell measurement data
+        data (pd.DataFrame) - cell measurement data
         reference (list) - reference cell types
         offset (int) - index of first early reference cell (excludes outliers)
         n (int) - number of early reference cells included
@@ -765,14 +765,15 @@ class PerturbationComparison(Base):
         Returns:
         concurrent (pd.DataFrame) - concurrent cell measurement data
         """
-        selected = df[df.label.isin(reference)]
+        selected = data[data.label.isin(reference)]
+        selected.sort_values(by='t', inplace=True)
         tmin = selected.iloc[offset:n].t.min()
         tmax = selected.iloc[offset:n].t.max()
-        concurrent = df[df.t.between(tmin, tmax)]
+        concurrent = data[data.t.between(tmin, tmax)]
         return concurrent
 
     def render(self,
-               channel='ratio',
+               channel='logratio',
                figsize=(1., 1.5),
                **kwargs):
         """
@@ -794,7 +795,7 @@ class PerturbationComparison(Base):
         self._format_ax(self.fig.axes[0])
 
     def plot(self,
-             channel='ratio',
+             channel='logratio',
              color='k',
              size=2):
         """

@@ -21,7 +21,7 @@ class Correlation(Base):
     num_discs (int) - number of separate eye discs in experiment
 
     Inherited attributes:
-    df (pd.DataFrame) - data
+    data (pd.DataFrame) - data
     fig (matplotlib.figure.Figure)
     """
 
@@ -35,11 +35,11 @@ class Correlation(Base):
         Args:
         experiment (data.experiments.Experiment)
         """
-        super().__init__(experiment.get_cells('pre').df)
+        super().__init__(experiment.get_cells('pre').data)
         self.num_discs = len(experiment.discs)
 
     def render(self,
-               channel='ratio',
+               channel='logratio',
                tmin=0,
                tmax=1.75):
         """
@@ -61,7 +61,7 @@ class Correlation(Base):
         plt.subplots_adjust(hspace=0)
 
     def plot(self,
-             channel='ratio',
+             channel='logratio',
              tmin=0,
              tmax=1.75):
         """
@@ -76,11 +76,11 @@ class Correlation(Base):
         for disc_id, ax in enumerate(self.fig.axes):
 
             # select cells
-            cells = self.df[self.df.disc_id==disc_id]
+            cells = self.data[self.data.disc_id==disc_id]
             cells = cells[cells.t.between(tmin, tmax)]
 
             # instantiate correlation object
-            corr = SpatialCorrelation(cells, channel, y_only=True, raw=False)
+            corr = SpatialCorrelation(channel, data=cells, y_only=True)
 
             # specify smoothing parameters
             ma_kw = dict(window_size=50,
@@ -156,13 +156,13 @@ class Periodogram(Correlation):
     Object for visualizing spectral power density of periodic spatial patterns within each eye disc of an experiment.
 
     Inherited attributes:
-    df (pd.DataFrame) - data
+    data (pd.DataFrame) - data
     fig (matplotlib.figure.Figure)
     num_discs (int) - number of separate eye discs in experiment
     """
 
     def render(self,
-               channel='ratio',
+               channel='logratio',
                tmin=0,
                tmax=1.75,
                period_range=(50, 200)):
@@ -183,7 +183,7 @@ class Periodogram(Correlation):
         self.plot(channel, tmin=tmin, tmax=tmax, period_range=period_range)
 
     def plot(self,
-             channel='ratio',
+             channel='logratio',
              tmin=0,
              tmax=1.75,
              period_range=(50, 200)):
@@ -204,7 +204,7 @@ class Periodogram(Correlation):
         for disc_id, ax in enumerate(self.fig.axes):
 
             # select cells
-            cells = self.df[self.df.disc_id==disc_id]
+            cells = self.data[self.data.disc_id==disc_id]
             cells = cells[cells.t.between(tmin, tmax)]
 
             # plot spectrogram
@@ -266,7 +266,7 @@ class R8Spacing(Base):
     Distances are obtained by sliding a narrow (~1 hr developmental time) window along the anterior-posterior axis and computing the distance between adjacent R8 neurons within the window.
 
     Inherited attributes:
-    df (pd.DataFrame) - data
+    data (pd.DataFrame) - data
     fig (matplotlib.figure.Figure)
     """
 
@@ -294,10 +294,10 @@ class R8Spacing(Base):
             distances[i] = np.hstack((dist, nans))
 
         # compile dataframe of distances
-        df = pd.DataFrame.from_dict(distances)
+        data = pd.DataFrame.from_dict(distances)
 
         # call base class instantiation
-        super().__init__(df)
+        super().__init__(data)
 
     @staticmethod
     def _evaluate_distances(disc, dt=1.75):
@@ -315,9 +315,9 @@ class R8Spacing(Base):
         """
         r8s = disc.select_cell_type('r8')
         distances = np.array([])
-        for tmin in np.arange(r8s.df.t.min(), r8s.df.t.max(), dt/2):
+        for tmin in np.arange(r8s.data.t.min(), r8s.data.t.max(), dt/2):
             cells = r8s.select_by_position(tmin=tmin, tmax=tmin+dt)
-            ycoords = cells.df[['centroid_y']].values.flatten()
+            ycoords = cells.data[['centroid_y']].values.flatten()
             distances = np.hstack((distances, np.diff(sorted(ycoords))))
         return distances[1:]
 
@@ -341,7 +341,7 @@ class R8Spacing(Base):
         ax = self.fig.axes[0]
 
         # plot distributions
-        sns.boxplot(data=self.df,
+        sns.boxplot(data=self.data,
                     orient='h',
                     fliersize=0,
                     notch=True,

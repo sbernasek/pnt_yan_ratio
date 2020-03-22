@@ -9,27 +9,27 @@ class Base:
     Base class for figures providing some common methods.
 
     Attributes:
-    df (pd.DataFrame) - data
+    data (pd.DataFrame) - data
     fig (matplotlib.figure.Figure)
     """
 
     # set default directory as class attribute
     directory = 'graphics'
 
-    def __init__(self, df):
+    def __init__(self, data):
         """
         Instantiate Figure.
 
         Args:
-        df (pd.DataFrame) - data for figure
+        data (pd.DataFrame) - data for figure
         """
-        self.df = df
+        self.data = data
         self.fig = None
 
     def save(self,
              name='figure',
              directory=None,
-             fmt='pdf',
+             fmt='pdata',
              dpi=300,
              rasterized=False):
         """
@@ -88,8 +88,8 @@ class Base:
         Returns:
         yan_channel (str) - Yan color channel
         """
-        if experiment.discs[0].normalization == 'red':
-            yan_channel = 'blue'
+        if experiment.discs[0].normalization == 'ch0':
+            yan_channel = 'ch2_normalized'
         else:
-            yan_channel = 'red'
+            yan_channel = 'ch0_normalized'
         return yan_channel

@@ -19,21 +19,21 @@ class JointDistribution(Base):
     pre_color (tuple) - grey color for progenitors
 
     Inherited attributes:
-    df (pd.DataFrame) - data
+    data (pd.DataFrame) - data
     fig (matplotlib.figure.Figure)
     """
 
     # set class path and name
     path = 'graphics/jointdistribution'
 
-    def __init__(self, df):
+    def __init__(self, data):
         """
         Initialize object for constructing joint distribution plots.
 
         Args:
-        df (pd.DataFrame)
+        data (pd.DataFrame)
         """
-        super().__init__(df)
+        super().__init__(data)
 
         # get color for progenitors
         greys = Palette({'grey': 'grey'})
@@ -54,9 +54,9 @@ class JointDistribution(Base):
 
         # select measurement data
         cells = reduce(add, experiment.discs.values())
-        df = cells.select_cell_type(cell_types).df
+        data = cells.select_cell_type(cell_types).data
 
-        return cls(df)
+        return cls(data)
 
     def render(self,
                cell_types=['pre'],
@@ -89,7 +89,7 @@ class JointDistribution(Base):
         """
 
         # select cells
-        cells = self.df[self.df.label.isin(cell_types)]
+        cells = self.data[self.data.label.isin(cell_types)]
 
         # define formatting arguments
         joint_kws = {'edgecolor': 'white',
@@ -105,7 +105,7 @@ class JointDistribution(Base):
                         'hist_kws': hist_kws}
 
         # create jointplot
-        fig = sns.jointplot('blue', 'green',
+        fig = sns.jointplot('ch2_normalized', 'ch1_normalized',
                           data=cells,
                           height=height,
                           ratio=3,
@@ -117,7 +117,7 @@ class JointDistribution(Base):
                           ylim=(0, 2))
 
         # add diagonal with slope equivalent to median ratio
-        median_ratio = 2**(cells.ratio.median())
+        median_ratio = 2**(cells.logratio.median())
         fig.ax_joint.plot([0, 1.5], [0, 1.5*median_ratio], '-',
                         linewidth=1, color='k', zorder=0)
         #angle = np.arctan(median_ratio) * 180/np.pi
@@ -139,19 +139,19 @@ class DualJointDistribution(JointDistribution):
     reference_color (RGB tuple) - color for reference cell type
 
     Inherited attributes:
-    df (pd.DataFrame) - data
+    data (pd.DataFrame) - data
     fig (matplotlib.figure.Figure)
     pre_color (RGB tuple) - color for progenitors
     """
-    def __init__(self, df, reference):
+    def __init__(self, data, reference):
         """
         Instantiate joint distribution figure with two cell types.
 
         Args:
-        df (pd.DataFrame) - data containing Control/Perturbation labels
+        data (pd.DataFrame) - data containing Control/Perturbation labels
         reference (list) - reference cell types
         """
-        super().__init__(df)
+        super().__init__(data)
         self.reference = reference
 
         # get color for reference cell type
@@ -173,19 +173,19 @@ class DualJointDistribution(JointDistribution):
         """
 
         # select cells concurrent with reference
-        df = experiment.select_by_concurrency(reference, **kwargs)
+        data = experiment.select_by_concurrency(reference, **kwargs)
 
-        return cls(df, reference)
+        return cls(data, reference)
 
     def add_reference_to_fig(self):
         """ Add reference cell type to joint and marginal axes. """
 
         # select reference cells
-        df = self.df[self.df.Population=='Differentiated']
+        data = self.data[self.data.Population=='Differentiated']
 
         # scatter neurons on joint axes
-        self.fig.x = df['blue']
-        self.fig.y = df['green']
+        self.fig.x = data['ch2_normalized']
+        self.fig.y = data['ch1_normalized']
         self.fig.plot_joint(plt.scatter,
                             c=self.reference_color,
                             linewidth=0.25,
@@ -198,7 +198,7 @@ class DualJointDistribution(JointDistribution):
         ylim = axy.get_ylim()
 
         # add reference cell distributions to marginal x axis
-        axx.hist(df['blue'],
+        axx.hist(data['ch2_normalized'],
                  bins=np.arange(0, 2, 0.05),
                  color=self.reference_color,
                  alpha=0.75,
@@ -207,7 +207,7 @@ class DualJointDistribution(JointDistribution):
         axx.set_xlim(*xlim)
 
         # add reference cell distributions to marginal y axis
-        axy.hist(df['green'],
+        axy.hist(data['ch1_normalized'],
                  orientation='horizontal',
                  bins=np.arange(0, 2, 0.05),
                  color=self.reference_color,
@@ -243,7 +243,7 @@ class DualJointDistribution(JointDistribution):
         axx, axy = self.fig.ax_marg_x, self.fig.ax_marg_y
 
         # add data labels
-        label = 'Young ' + self.df['ReferenceType'].unique()[0]
+        label = 'Young ' + self.data['ReferenceType'].unique()[0]
         ax_joint.text(0.1, 2, label, ha='left', va='top', color=self.reference_color, fontsize=7)
         ax_joint.text(0.1, 2, '\nConcurrent multipotents', ha='left', va='top', color=self.pre_color, fontsize=7)
 
