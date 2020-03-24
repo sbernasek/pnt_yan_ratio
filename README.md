@@ -5,7 +5,6 @@ Overview
 This repository contains a series of Jupyter Notebooks that facilitate complete reproduction of all figures included in our study of Pnt and Yan expression during eye development in *Drosophila*. Refer to the [Jupyter documentation](https://jupyter-notebook.readthedocs.io/en/stable/) for an introduction to starting and running Jupyter Notebooks.
 
 
-
 System Requirements
 =========
 
@@ -16,9 +15,9 @@ Dependencies
 
  - [Seaborn](https://seaborn.pydata.org/)
  - [Jupyter Notebook](http://jupyter.org/install)
- - [FlyEye Analysis](https://sebastianbernasek.github.io/flyeye/index.html): our package for analyzing FlyEye Silhouette data
- - [FlyEye Clones](https://sebastianbernasek.github.io/clones/index.html): our package for analyzing eye clones
- - [Binding](https://github.com/sebastianbernasek/binding): our package for modeling protein-DNA binding interactions
+ - [FlyEye Analysis](https://www.sbernasek.com/flyeye/): our package for analyzing FlyEye Silhouette data
+ - [Fly-QMA](https://www.sbernasek.com/flyqma/): our package for automated quantitative mosaic analysis
+ - [TF-Binding](https://github.com/sebastianbernasek/binding): our package for modeling protein-DNA binding interactions
 
 
 
@@ -52,6 +51,8 @@ This repository includes a ``figures`` module comprised of several submodules fo
 
 * ``figures.phase`` Equilibrium binding occupancy phase diagrams and titration contours.
 
+* ``figures.clones`` Mosaic analysis of eye clones.
+
 
 
 Notebooks
@@ -71,10 +72,9 @@ We have included one notebook per primary figure that appears in the manuscript:
 
    6. ``Figure6.ipynb`` RTK signaling effects on Pnt and Yan levels.
 
-Each notebook is designed to walk a user through the generation of each subpanel comprising the primary figure and all of its supplements. We have explicitly named all subpanels in accordance with the corresponding figure numbers and panel letters that appear in our manuscript.
+Each notebook is designed to walk a user through the generation of each subpanel comprising the figure. We have explicitly named all subpanels in accordance with the corresponding figure numbers and panel letters that appear in our manuscript. The ``supplement`` directory contains notebooks used to generate all supplementary figure panels.
 
 Note that we applied some minor formatting adjustments using Adobe Illustrator. Consequently, figures rendered via these notebooks may not be aesthetically identical to those presented in our manuscript.
-
 
 
 Additional Questions
